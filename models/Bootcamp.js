@@ -79,26 +79,29 @@ const BootcampSchema = new mongoose.Schema({
     type: String,
     default: 'no-photo.jpg'
   },
-  // housing: {
-  //   type: Boolean,
-  //   default: false
-  // },
-  // jobAssistance: {
-  //   type: Boolean,
-  //   default: false
-  // },
-  // jobGuarantee: {
-  //   type: Boolean,
-  //   default: false
-  // },
-  // acceptGi: {
-  //   type: Boolean,
-  //   default: false
-  // },
+  housing: {
+    type: Boolean,
+    default: false
+  },
+  jobAssistance: {
+    type: Boolean,
+    default: false
+  },
+  jobGuarantee: {
+    type: Boolean,
+    default: false
+  },
+  acceptGi: {
+    type: Boolean,
+    default: false
+  },
   createdAt: {
     type: Date,
     default: Date.now
   }
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true}
 })
 
 
@@ -131,5 +134,94 @@ BootcampSchema.pre('save',  function(next) {
   
 })
 
+// Cascade delete courses when a bootcamp is deleted
+BootcampSchema.pre('remove', async function(next) {
+  await this.model('Course').deleteMany({
+    bootcamp: this._id
+  })
+  next()
+})
+
+// Reverse populate with virtuals
+BootcampSchema.virtual('courses', {
+  ref: 'Course',
+  localField: '_id',
+  foreignField: 'bootcamp',
+  justOne: false
+})
 
 module.exports = mongoose.model('Bootcamp', BootcampSchema);
+
+
+// const SoccerPlayerSchema = mongoose.Schema({
+//   name: {
+//     type: String,
+//     required: [true, 'Please add a name for player'],
+//     unique: true,
+//     trim: true,
+//     maxlength: [20, 'Name can not be longer than 20 characters']
+//   },
+//   birthday: {
+//     type: String,
+//     default: Date.now,
+//     required: true,
+//     trim: true
+//   },
+//   position: {
+//     type: [String],
+//     required: true
+//   },
+//   address: String,
+//   location: {
+//     type: {
+//       type: String,
+//       enum: ['Point']
+//     },
+//     coordinates: {
+//       type: [Number],
+//       index: '2dsphere'
+//     },
+//     formattedAddress: String,
+//     street: String,
+//     city: String,
+//     state: String,
+//     zipcode: String,
+//     country: String
+//   },
+//   representative: {
+//     type: [{name: String, country: String, age: Number}]
+//   },
+//   height: String,
+//   weight: String,
+//   ownerClubs: {
+//     oldClubs:[ {name: String, code: String} ],
+//     currentClub: { name: String, code: String, establishedYear: String},
+//     yearPlaying : String
+//   },
+//   salary: String
+// })
+
+// SoccerPlayer.pre('save',async (next) => {
+//   try {
+//     const loc = await geocoder.geocode(this.address)
+//     this.location = {
+//       type: 'Point',
+//       coordinates: [loc[0].longitude, loc[0].latitude],
+//         formattedAddress: loc[0].formattedAddress,
+//         street: loc[0].streetName,
+//         city: loc[0].city,
+//         state: loc[0].stateCode,
+//         zipcode: loc[0].zipcode,
+//         country: loc[0].countryCode
+
+//     }
+
+//     this.addrees = undefined
+//     next()
+//   } catch (error) {
+//     console.log('Error: ', error)
+//   }
+// })
+
+// module.exports = mongoose.model('Players', SoccerPlayerSchema)
+
