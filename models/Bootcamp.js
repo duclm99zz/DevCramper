@@ -152,7 +152,12 @@ BootcampSchema.virtual('courses', {
 
 module.exports = mongoose.model('Bootcamp', BootcampSchema);
 
-
+// BootcampSchema.virtuals('comments', {
+//   ref: 'Comment',
+//   localField: '_id',
+//   foreignField: 'bootcampId',
+//   justOne: false
+// })
 // const SoccerPlayerSchema = mongoose.Schema({
 //   name: {
 //     type: String,
@@ -199,6 +204,9 @@ module.exports = mongoose.model('Bootcamp', BootcampSchema);
 //     yearPlaying : String
 //   },
 //   salary: String
+// }, {
+//   toJSON: true,
+//   toObject: true
 // })
 
 // SoccerPlayer.pre('save',async (next) => {
@@ -221,6 +229,19 @@ module.exports = mongoose.model('Bootcamp', BootcampSchema);
 //   } catch (error) {
 //     console.log('Error: ', error)
 //   }
+// })
+
+// SoccerPlayerSchema.virtuals('Representatives', {
+//   ref: 'Representation',
+//   localField: '_id',
+//   foreignField: 'players',
+//   justOne: false
+// })
+// SoccerPlayerSchema.virtuals('Firms', {
+//   ref: 'Brand',
+//   localField: '_id',
+//   foreignField: 'soccerPlayers',
+//   justOne: false
 // })
 
 // module.exports = mongoose.model('Players', SoccerPlayerSchema)
