@@ -17,10 +17,7 @@ exports.register = asyncHandler(async (req, res, next) => {
     role
   })
 
-  // Create token
-  const token = user.getSignedJwtToken()
-
-  res.status(200).json({success: true, token})
+  sendTokenResponse(user, 200, res);
 })
 
 
@@ -49,16 +46,13 @@ exports.login = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Invalid password!', 401))
   } 
 
-  const token = user.getSignedJwtToken()
-
-  res.status(200).json({success: true, token, user})
   sendTokenResponse(user, 200, res)
 })
 
 
 
 // @desc Get token from Model, create cookie and send response
-const sendTokenResponse = (user, statusCode, response) => {
+const sendTokenResponse = (user, statusCode, res) => {
   // Create token
   const token = user.getSignedJwtToken()
   const options = {
@@ -82,7 +76,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 
   const user = await User.findOne({
     resetPasswordToken,
-    resetPasswordExpire: { $gt: Date.now()}
+    resetPasswordExpire: { $gt: Date.now() }
   })
   if(!user) {
     return next(new ErrorResponse('Invalid Token', 401))
@@ -91,7 +85,8 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
   user.resetPasswordToken = undefined
   user.resetPasswordExpire = undefined
   await user.save()
-  res.status(200).json({ success: true, data: user })
+  // res.status(200).json({ success: true, data: user })
+  sendTokenResponse(user, 200, res)
 })
 
 
@@ -142,4 +137,44 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     success: true,
     data: user
   })
+})
+
+
+// @desc Update users details
+// @route PUT api/v1/auth/updatedetails
+// @access Private
+
+exports.updateDetails = asyncHandler(async (req, res, next) => {
+  const fieldsToUpdate = {
+    name: req.body.name,
+    email: req.body.email
+  }
+  const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true
+  })
+
+  res.status(200).json({
+    success: true,
+    data: user
+  })
+})
+
+
+// @desc Update password
+// @route PUT api/v1/auth/updatepassword
+// @access Private
+
+exports.updatePassword = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select('+password')
+
+  // check current password
+  if (!(await user.matchPassword(req.body.currentPassword))) {
+    return next(new ErrorResponse('Password is incorrect', 401))
+  }
+
+  user.password = req.body.newPassword
+  await user.save()
+
+  sendTokenResponse(user, 200, res)
 })
