@@ -6,7 +6,7 @@ const errorHandler = (err, req, res, next) => {
   // Log to console.log for dev
   console.log(err.stack.red)
   if (err.name === 'CastError') {
-    const message = `Resources not found with id of ${error.value}`
+    const message = `Resources not found`
     error = new ErrorResponse(message, 404)
   }
   if (err.code === 11000) {

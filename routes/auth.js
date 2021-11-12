@@ -8,12 +8,14 @@ const {
   forgotPassword, 
   resetPassword, 
   updateDetails,
-  updatePassword
+  updatePassword,
+  logout
 } = require('../controller/auth')
 
 router.post('/register', register)
 
 router.post('/login', login)
+router.get('/logout', logout)
 router.get('/me', protect, getMe)
 router.put('/updatedetails', protect, updateDetails)
 router.post('/forgotpassword', forgotPassword)
